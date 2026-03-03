@@ -11,7 +11,8 @@
                 "-B",
                 "${workspaceFolder}/build",
                 "-G",
-                "MinGW Makefiles"
+                "MinGW Makefiles",
+                "-DCMAKE_BUILD_TYPE=Debug"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
