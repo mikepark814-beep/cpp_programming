@@ -1,0 +1,56 @@
+﻿{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "configure (cmake UCRT64)",
+            "type": "process",
+            "command": "C:\\msys64\\ucrt64\\bin\\cmake.exe",
+            "args": [
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build",
+                "-G",
+                "MinGW Makefiles"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "build (cmake UCRT64)",
+            "type": "process",
+            "command": "C:\\msys64\\ucrt64\\bin\\cmake.exe",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "configure (cmake UCRT64)",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build (cmake launch target UCRT64)",
+            "type": "process",
+            "command": "C:\\msys64\\ucrt64\\bin\\cmake.exe",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--target",
+                "${command:cmake.launchTargetName}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "configure (cmake UCRT64)",
+            "problemMatcher": []
+        }
+    ]
+}
