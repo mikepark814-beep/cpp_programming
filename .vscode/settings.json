@@ -7,10 +7,19 @@
                 "-here",
                 "-no-start",
                 "-ucrt64"
-            ]
+            ],
+            "env": {
+                "MSYS2_PATH_TYPE": "inherit"
+            }
+        },
+        "Command Prompt": {
+            "path": "C:\\Windows\\System32\\cmd.exe"
         }
     },
     "terminal.integrated.defaultProfile.windows": "MSYS2 UCRT64",
+    "terminal.integrated.automationProfile.windows": {
+        "path": "C:\\Windows\\System32\\cmd.exe"
+    },
     "cmake.cmakePath": "C:\\msys64\\ucrt64\\bin\\cmake.exe",
     "cmake.generator": "MinGW Makefiles",
     "cmake.configureOnOpen": true,
@@ -34,6 +43,13 @@
         "MIMode": "gdb",
         "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe",
         "externalConsole": false,
+        "console": "internalConsole",
+        "environment": [
+            {
+                "name": "PATH",
+                "value": "C:\\Windows\\System32;C:\\msys64\\ucrt64\\bin;${env:PATH}"
+            }
+        ],
         "setupCommands": [
             {
                 "description": "Enable GDB pretty printing",
@@ -43,9 +59,6 @@
         ]
     },
     "cmake.environment": {
-        "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
-    },
-    "terminal.integrated.env.windows": {
         "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
     }
 }

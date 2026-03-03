@@ -96,9 +96,13 @@ labs/q03/
 ## 4. 제출 전 체크리스트
 
 1. VS Code 기본 터미널이 **MSYS2 UCRT64**인지 확인
-2. `Ctrl+Shift+B` → 빌드 성공
-3. `F5` → 디버그 시작 성공
-4. `build/compile_commands.json` 파일 생성 확인
+2. GDB 경로가 **UCRT64**인지 확인 (`C:\msys64\ucrt64\bin\gdb.exe`)
+3. 하단 상태 표시줄의 Launch Target이 실제 타깃(`lab_q01`, `lab_q02` 등)인지 확인
+4. `Ctrl+Shift+B` → 빌드 성공
+5. `Ctrl+F5` → 실행 성공
+6. `F5` → 디버그 시작 성공
+7. `build/compile_commands.json` 파일 생성 확인
+8. 실행 시 `0xc0000135` 또는 `api-ms-win-crt-*` 에러가 나면 → **5. 문제 해결** 참고
 
 ## 5. 문제 해결
 
@@ -111,7 +115,7 @@ labs/q03/
 | `where g++` 결과가 여러 개 | `mingw64`와 `ucrt64` 혼용 금지 — `ucrt64\bin` 하나만 PATH에 유지 |
 | 실행 시 `api-ms-win-crt-*.dll` 못 찾음 | 아래 **DLL 로딩 오류** 항목 참고 |
 
-### DLL 로딩 오류 (`api-ms-win-crt-*.dll is missing`)
+### DLL 로딩 오류 (`api-ms-win-crt-*.dll` / `0xc0000135`)
 
 실행 시 다음과 같은 에러가 발생할 수 있습니다:
 
@@ -120,15 +124,33 @@ error while loading shared libraries: api-ms-win-crt-string-l1-1-0.dll:
 cannot open shared object file: No such file or directory
 ```
 
-**원인:** 터미널이 UCRT64가 아닌 **MINGW64 환경**으로 열린 경우 발생합니다. ucrt64 GCC로 빌드한 바이너리를 mingw64 런타임으로 실행하면 Windows UCRT DLL을 찾지 못합니다.
+**원인:** MSYS Bash 터미널과 Windows 디버거/실행기의 **실행 계층 충돌**입니다.
+
+- `cppdbg`(WindowsDebugLauncher.exe)는 Windows 프로세스 체인으로 실행되어야 하는데, MSYS Bash 경로를 경유하면서 PATH가 꼬임
+- Windows는 PATH 구분자로 `;`을 쓰고, MSYS/Linux는 `:`을 씀 — Bash 환경에 Windows식 PATH를 직접 주입하면 경로가 깨져서 런타임 DLL을 못 찾게 됨
+
+**해결 방법 (이 프로젝트의 설정):**
+
+1. **터미널 역할 분리**
+   - 사용자 기본 터미널: **MSYS2 UCRT64** 유지 (개발 편의)
+   - 자동 실행(빌드/디버그): **cmd.exe**로 고정 (`automationProfile.windows`)
+
+2. **디버그 콘솔 분리**
+   - launch.json의 `console`을 `internalConsole`로 사용하여 Bash 경유 최소화
+
+3. **PATH 정리**
+   - 디버그 환경 PATH: `C:\Windows\System32;C:\msys64\ucrt64\bin;...` (Windows 시스템 경로 우선)
+   - 터미널 전역 PATH 오버라이드(`terminal.integrated.env.windows`) 제거
+   - MSYS2 터미널에 `MSYS2_PATH_TYPE=inherit` 설정으로 Windows PATH 자연 상속
 
 **확인 방법:**
 
 ```bash
-echo $MSYSTEM    # UCRT64여야 정상. MINGW64면 문제의 원인
+echo $MSYSTEM          # UCRT64여야 정상
+echo $MSYS2_PATH_TYPE  # inherit여야 정상
 ```
 
-**해결:** VS Code 터미널을 닫고 새로 열어 `MSYSTEM`이 `UCRT64`인지 확인합니다. 계속 `MINGW64`로 열리면 `.vscode/settings.json`의 터미널 프로필이 `msys2_shell.cmd -ucrt64`를 사용하는지 확인하세요.
+**한 줄 요약:** 컴파일은 성공했지만 실행 계층과 PATH가 섞여 디버거 시작 시 DLL 로딩이 실패한 문제이며, **터미널/디버그 환경 분리 + PATH 정리**로 해결합니다.
 
 ## 6. Gemini Code Assist Agent Mode (Windows)
 
@@ -216,7 +238,16 @@ Copy-Item "$vscode\bin" "$vscode\$($hash.Name)\bin" -Recurse -Force
 
 이 프로젝트의 `.vscode/` 설정은 **시스템 PATH에 의존하지 않고** 도구 경로를 직접 지정합니다. 따라서 학생 PC마다 PATH가 달라도 동일하게 동작합니다.
 
-- **settings.json**: 기본 터미널을 MSYS2 UCRT64로 고정 (`msys2_shell.cmd -ucrt64` 사용), CMake 경로/Generator 명시
+핵심 설계: **MSYS 터미널과 Windows 디버거는 실행 계층이 다르므로 역할을 분리**합니다.
+
+- **settings.json**:
+  - 기본 터미널: MSYS2 UCRT64 (`msys2_shell.cmd -ucrt64`), `MSYS2_PATH_TYPE=inherit`로 Windows PATH 상속
+  - 자동화 프로필(`automationProfile.windows`): **cmd.exe**로 고정 — 빌드/디버그 Task가 Bash를 경유하지 않도록 분리
+  - CMake 경로/Generator 명시
 - **tasks.json**: CMake configure + build Task 정의 (`Ctrl+Shift+B` 연결)
-- **launch.json**: GDB 디버거 경로 고정, CMake 타깃 자동 연결 (`F5` 연결)
+- **launch.json**:
+  - GDB 디버거 경로 고정 (`C:\msys64\ucrt64\bin\gdb.exe`)
+  - 디버그 콘솔: `internalConsole` — Bash 경유 없이 Windows 프로세스 체인으로 실행
+  - 디버그 PATH: `C:\Windows\System32;C:\msys64\ucrt64\bin;...` (Windows 시스템 경로 우선)
+  - CMake 타깃 자동 연결 (`F5` 연결)
 - **c_cpp_properties.json**: IntelliSense가 UCRT64 컴파일러와 `compile_commands.json`을 사용하도록 지정

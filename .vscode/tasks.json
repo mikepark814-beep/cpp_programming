@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "2.0.0",
     "tasks": [
         {
@@ -46,6 +46,22 @@
                 "${workspaceFolder}/build",
                 "--target",
                 "${command:cmake.launchTargetName}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "configure (cmake UCRT64)",
+            "problemMatcher": []
+        },
+        {
+            "label": "build (q01 UCRT64)",
+            "type": "process",
+            "command": "C:\\msys64\\ucrt64\\bin\\cmake.exe",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--target",
+                "lab_q01"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
