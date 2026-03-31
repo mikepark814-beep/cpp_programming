@@ -11,7 +11,7 @@
                 "-B",
                 "${workspaceFolder}/build",
                 "-G",
-                "MinGW Makefiles",
+                "Ninja",
                 "-DCMAKE_BUILD_TYPE=Debug"
             ],
             "options": {

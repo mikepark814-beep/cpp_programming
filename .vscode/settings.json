@@ -1,4 +1,4 @@
-﻿{
+{
     "terminal.integrated.profiles.windows": {
         "MSYS2 UCRT64": {
             "path": "C:\\msys64\\msys2_shell.cmd",
@@ -21,7 +21,7 @@
         "path": "C:\\Windows\\System32\\cmd.exe"
     },
     "cmake.cmakePath": "C:\\msys64\\ucrt64\\bin\\cmake.exe",
-    "cmake.generator": "MinGW Makefiles",
+    "cmake.generator": "Ninja",
     "cmake.configureOnOpen": true,
     "cmake.buildBeforeRun": true,
     "cmake.configureEnvironment": {
@@ -33,7 +33,6 @@
     "cmake.configureSettings": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_MAKE_PROGRAM": "C:/msys64/ucrt64/bin/mingw32-make.exe",
         "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/gcc.exe",
         "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe"
     },
