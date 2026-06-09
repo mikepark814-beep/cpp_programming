@@ -37,6 +37,13 @@
         "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe"
     },
     "C_Cpp.default.compilerPath": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.path": "C:\\msys64\\ucrt64\\bin\\clangd.exe",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build",
+        "--clang-tidy",
+        "--header-insertion=never"
+    ],
     "cmake.debugConfig": {
         "type": "cppdbg",
         "MIMode": "gdb",

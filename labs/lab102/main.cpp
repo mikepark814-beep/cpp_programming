@@ -1,89 +1,55 @@
-#include "tetris.h"
+#include "my_vector.h"
 
 #include <iostream>
-#include <istream>
+#include <print>
+#include <ranges>
 #include <string>
 
-namespace {
-
-const char* btext(bool value) {
-    return value ? "true" : "false";
+// std::ranges::input_range 제약을 만족하는 어떤 범위든 받아 출력한다.
+// my_vector 가 begin()/end() 를 제공하므로 함께 사용할 수 있다.
+template <std::ranges::input_range R>
+void print_values(R&& values) {
+    bool first = true;
+    for (const auto& val : values) {
+        if (!first) {
+            std::print(" ");
+        }
+        std::print("{}", val);
+        first = false;
+    }
+    std::println("");
 }
-
-void cmd_state(const GameState& state) {
-    std::cout << "state tick=" << state.tick
-              << " x=" << state.active.position.x
-              << " y=" << state.active.position.y
-              << " running=" << btext(state.running) << '\n';
-}
-
-} // namespace
 
 int main() {
-    std::ios_base::sync_with_stdio(false);
-    std::istream& input = std::cin;
-
-    GameState state;
-    init_game(state);
-
-    std::string token;
-    while (input >> token) {
-        if (token == "LEFT" || token == "RIGHT" || token == "DOWN" || token == "DROP" || token == "QUIT") {
-            handle_game_action(state, parse_action(token));
-        } else if (token == "tick") {
-            int n = 0;
-            input >> n;
-            for (int i = 0; i < n; ++i) {
-                update_game(state);
-            }
-        } else if (token == "move") {
-            int dx = 0;
-            int dy = 0;
-            input >> dx >> dy;
-            const bool ok = move_piece(state, dx, dy);
-            std::cout << "move(" << dx << "," << dy << ")=" << btext(ok)
-                      << " x=" << state.active.position.x
-                      << " y=" << state.active.position.y << '\n';
-        } else if (token == "cells") {
-            int x = 0;
-            int y = 0;
-            input >> x >> y;
-            std::cout << "cells(" << x << "," << y << ")=";
-            bool first = true;
-            for (Position cell : state.active.piece.cells({x, y})) {
-                if (!first) std::cout << ' ';
-                std::cout << '(' << cell.x << ',' << cell.y << ')';
-                first = false;
-            }
-            std::cout << '\n';
-        } else if (token == "paint") {
-            int x = 0;
-            int y = 0;
-            char value = '.';
-            input >> x >> y >> value;
-            state.board.setCell({x, y}, value);
-        } else if (token == "render") {
-            std::cout << board_to_string(state);
-        } else if (token == "state") {
-            cmd_state(state);
-        } else if (token == "parse") {
-            std::string action_token;
-            input >> action_token;
-            std::cout << "parse(" << action_token << ")=" << action_to_string(parse_action(action_token)) << '\n';
-        } else if (token == "equal_default") {
-            GameState left;
-            GameState right;
-            init_game(left);
-            init_game(right);
-            std::cout << "equal_default=" << btext(left.active == right.active) << '\n';
-        } else if (token == "reset") {
-            init_game(state);
-        } else if (token == "end") {
-            break;
-        } else {
-            std::cerr << "unknown command: " << token << '\n';
-            return 2;
-        }
+    std::string mode;
+    if (!(std::cin >> mode)) {
+        mode = "basic";
     }
-    return 0;
+
+    if (mode == "basic") {
+        // CTAD: <int> 를 명시하지 않아도 컴파일러가 추론한다.
+        my_vector values = {1, 2, 3, 4, 5};
+        my_vector copied(values);
+        copied[4] = 10;
+
+        print_values(values);
+        print_values(copied);
+    } else if (mode == "const") {
+        // const 객체에서도 operator[] 로 원소를 읽을 수 있어야 한다.
+        const my_vector<std::string> words = {std::string("template"), std::string("class")};
+        std::println("{} {} {}", words.size(), words[0], words[1]);
+    } else if (mode == "double") {
+        my_vector<double> numbers = {1.5, 2.25};
+        numbers[0] = 3.5;
+        std::println("{} {}", numbers.size(), numbers[0] + numbers[1]);
+    } else if (mode == "modern") {
+        // emplace_back (가변 인자 템플릿 + 완벽한 전달) 와
+        // 범위 기반 for (Deducing This 의 begin/end) 시연.
+        my_vector<int> v;
+        v.emplace_back(7);
+        v.emplace_back(8);
+        v.emplace_back(9);
+        print_values(v);
+        std::println("{}", v.size());
+    }
 }
